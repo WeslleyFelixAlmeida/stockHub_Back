@@ -46,36 +46,36 @@ class UserMiddleware {
   }
 
   async authMiddleware(req: Request, res: Response, next: NextFunction) {
-    // try {
-    //   const auth_token = req.cookies.auth_token;
-    //   if (!auth_token) {
-    //     return res.status(401).json({ message: "Erro de autenticação" });
-    //   }
+    try {
+      const auth_token = req.cookies.auth_token;
+      if (!auth_token) {
+        return res.status(401).json({ message: "Erro de autenticação" });
+      }
 
-    //   if (!env.JWT_SECRET) {
-    //     return res.status(500).json({ message: "Ocorreu um erro no servidor" });
-    //   }
+      if (!env.JWT_SECRET) {
+        return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+      }
 
-    //   const tokenData = jwt.verify(auth_token, env.JWT_SECRET) as JwtPayload;
+      const tokenData = jwt.verify(auth_token, env.JWT_SECRET) as JwtPayload;
 
-    //   const validation = authSchema.parse({
-    //     auth_token: auth_token,
-    //   });
+      const validation = authSchema.parse({
+        auth_token: auth_token,
+      });
 
-    //   next();
-    // } catch (error: any) {
-    //   if (error instanceof ZodError) {
-    //     return res
-    //       .status(400)
-    //       .json({ message: "Informações inválidas", error: error.issues });
-    //   }
+      next();
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: "Informações inválidas", error: error.issues });
+      }
 
-    //   if (error instanceof TokenExpiredError) {
-    //     return res.status(401).json({ message: "Erro de autenticação" });
-    //   }
+      if (error instanceof TokenExpiredError) {
+        return res.status(401).json({ message: "Erro de autenticação" });
+      }
 
-    //   return res.status(500).json({ message: "Ocorreu um erro no servidor" });
-    // }
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
   }
 
   async refreshTokenMiddleware(
@@ -83,26 +83,27 @@ class UserMiddleware {
     res: Response,
     next: NextFunction,
   ) {
-    // try {
-    //   const refresh_token = req.cookies.refresh_token;
+    try {
+      const refresh_token = req.cookies.refresh_token;
 
-    //   if (!refresh_token) {
-    //     return res.status(401).json({ message: "Erro de autenticação" });
-    //   }
+      if (!refresh_token) {
+        return res.status(401).json({ message: "Erro de autenticação" });
+      }
 
-    //   const validation = refreshTokenSchema.parse({
-    //     refresh_token: refresh_token,
-    //   });
+      const validation = refreshTokenSchema.parse({
+        refresh_token: refresh_token,
+      });
 
-    //   next();
-    // } catch (error: any) {
-    //   if (error instanceof ZodError) {
-    //     return res
-    //       .status(400)
-    //       .json({ message: "Informações inválidas", error: error.issues });
-    //   }
-    //   return res.status(500).json({ message: "Ocorreu um erro no servidor" });
-    // }
+      next();
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: "Informações inválidas", error: error.issues });
+      }
+
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
   }
 
   async updateUsernameMiddleware(

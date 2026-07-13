@@ -28,19 +28,18 @@ class UserController {
   }
 
   async storeRefreshToken(data: { token: string; userId: number }) {
-    // const store = await this.userService.storeRefreshToken({
-    //   token: data.token,
-    //   userId: data.userId,
-    // });
+    const store = await this.userService.storeRefreshToken({
+      token: data.token,
+      userId: data.userId,
+    });
   }
 
   async logout(req: Request, res: Response) {
-    // const refreshToken = req.cookies.refresh_token;
-    // const logout = await this.userService.logout({ token: refreshToken });
-
-    // res.clearCookie("auth_token");
-    // res.clearCookie("refresh_token");
-    // return res.status(200).json("logout realizado!");
+    const refreshToken = req.cookies.refresh_token;
+    const logout = await this.userService.logout({ token: refreshToken });
+    res.clearCookie("auth_token");
+    res.clearCookie("refresh_token");
+    return res.status(200).json("logout realizado!");
   }
 
   async login(req: Request, res: Response) {
@@ -103,7 +102,7 @@ class UserController {
       token: data.refreshToken,
       userId: Number(data.userId),
     });
-    
+
     data.res.cookie("auth_token", data.accessToken, {
       httpOnly: true,
       secure: false, // em produção deve ser true
@@ -118,30 +117,30 @@ class UserController {
   }
 
   async getNewToken(req: Request, res: Response) {
-    // try {
-    //   const validate = await this.userService.checkTokenAndUserData({
-    //     token: req.cookies.refresh_token,
-    //   });
+    try {
+      const validate = await this.userService.checkTokenAndUserData({
+        token: req.cookies.refresh_token,
+      });
 
-    //   const { accessToken, refreshToken } = await this.createTokens({
-    //     id: validate.id!,
-    //     email: validate.email!,
-    //   });
+      const { accessToken, refreshToken } = await this.createTokens({
+        id: validate.id!,
+        email: validate.email!,
+      });
 
-    //   await this.auth({
-    //     res: res,
-    //     accessToken: accessToken,
-    //     refreshToken: refreshToken,
-    //     userId: validate.id!,
-    //   });
+      await this.auth({
+        res: res,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        userId: validate.id!,
+      });
 
-    //   return res.status(200).json("Revalidação concluída");
-    // } catch (error: any) {
-    //   if (error instanceof InvalidCredentialsException) {
-    //     return res.status(401).json({ message: "Credenciais inválidas" });
-    //   }
-    //   return res.status(500).json({ message: "Ocorreu um erro no servidor" });
-    // }
+      return res.status(200).json("Revalidação concluída");
+    } catch (error: any) {
+      if (error instanceof InvalidCredentialsException) {
+        return res.status(401).json({ message: "Credenciais inválidas" });
+      }
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
   }
 
   private async getTokenData(data: { authToken: string }) {
@@ -183,7 +182,7 @@ class UserController {
       });
 
       await this.userService.logout({ token: refresh_token });
-      
+
       res.clearCookie("auth_token");
       res.clearCookie("refresh_token");
       return res.status(200).json({ message: "Conta deletada com sucesso" });

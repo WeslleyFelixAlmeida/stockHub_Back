@@ -3,9 +3,14 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import userRoutes from "./modules/user/routes/userRoutes";
+import { connectRedis } from "./connections/redis";
 
 async function serverInit() {
   try {
+    await connectRedis(); //Descomentar depois!
+
+    console.log("Redis conectado!"); //Descomentar depois!
+
     const server = express();
 
     const PORT = env.PORT || 8000;
@@ -19,7 +24,6 @@ async function serverInit() {
         credentials: true,
       }),
     );
-    
     server.use("/user", userRoutes);
 
     server.listen(PORT, () => {

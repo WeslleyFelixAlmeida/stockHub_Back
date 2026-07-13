@@ -49,16 +49,16 @@ export class UserService {
   }
 
   async storeRefreshToken(data: { token: string; userId: number }) {
-    // await this.userRepository.storeRefreshToken({
-    //   token: data.token,
-    //   userId: data.userId,
-    // });
+    await this.userRepository.storeRefreshToken({
+      token: data.token,
+      userId: data.userId,
+    });
   }
 
   async logout(data: { token: string }) {
-    // await this.userRepository.logout({
-    //   token: data.token,
-    // });
+    await this.userRepository.logout({
+      token: data.token,
+    });
   }
 
   async getUserData(data: { email: string }) {
@@ -80,14 +80,14 @@ export class UserService {
   }
 
   async checkTokenAndUserData(data: { token: string }) {
-    // const userId = await this.userRepository.getUserIdByRedis({
-    //   token: data.token,
-    // });
+    const userId = await this.userRepository.getUserIdByRedis({
+      token: data.token,
+    });
 
-    // const userData = await this.getUserDataById({ id: userId.userId });
-    // await this.userRepository.removeRefreshToken({ token: data.token });
+    const userData = await this.getUserDataById({ id: userId.userId });
+    await this.userRepository.removeRefreshToken({ token: data.token });
 
-    // return userData;
+    return userData;
   }
 
   async updateUsername(data: { userId: number; newUsername: string }) {

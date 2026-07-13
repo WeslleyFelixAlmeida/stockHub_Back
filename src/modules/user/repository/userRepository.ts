@@ -1,6 +1,7 @@
 import { RegisterDTO } from "../dtos/user/registerDTO";
 import { prisma } from "../../../connections/prisma";
 import { InvalidCredentialsException } from "../../../exceptions/invalidCredentialsException";
+import { redis } from "../../../connections/redis";
 
 export class UserRepository {
   async registerUser(data: RegisterDTO) {
@@ -50,13 +51,13 @@ export class UserRepository {
   }
 
   async storeRefreshToken(data: { token: string; userId: number }) {
-    // try {
-    //   await redis.set(`refresh_token:${data.token}`, String(data.userId), {
-    //     EX: 60 * 60 * 24 * 7,
-    //   });
-    // } catch (error: any) {
-    //   throw new Error(error);
-    // }
+    try {
+      await redis.set(`refresh_token:${data.token}`, String(data.userId), {
+        EX: 60 * 60 * 24 * 7,
+      });
+    } catch (error: any) {
+      throw new Error(error);
+    }
   }
 
   async logout(data: { token: string }) {
@@ -68,23 +69,21 @@ export class UserRepository {
   }
 
   async removeRefreshToken(data: { token: string }) {
-    // await redis.del(`refresh_token:${data.token}`);
+    await redis.del(`refresh_token:${data.token}`);
   }
 
   async getUserIdByRedis(data: { token: string }) {
-    // try {
-    //   const tokenData = await redis.get(`refresh_token:${data.token}`);
-
-    //   if (!tokenData) {
-    //     throw new InvalidCredentialsException();
-    //   }
-
-    //   return { userId: Number(tokenData) };
-    // } catch (error: any) {
-    //   throw new Error(error);
-    // }
+    try {
+      const tokenData = await redis.get(`refresh_token:${data.token}`);
+      if (!tokenData) {
+        throw new InvalidCredentialsException();
+      }
+      return { userId: Number(tokenData) };
+    } catch (error: any) {
+      throw new Error(error);
+    }
   }
-  
+
   async updateUsername(data: { newUsername: string; userId: number }) {
     try {
       return await prisma.user.update({
