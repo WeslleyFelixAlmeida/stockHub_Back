@@ -45,6 +45,18 @@ class UserMiddleware {
     }
   }
 
+  private async getTokenData(data: { authToken: string }) {
+    if (!env.JWT_SECRET) {
+      throw new Error("JWT_SECRET não configurado");
+    }
+
+    const tokenData = jwt.verify(data.authToken, env.JWT_SECRET) as JwtPayload;
+    return {
+      id: Number(tokenData.sub),
+      email: tokenData.email,
+    };
+  }
+
   async authMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
       const auth_token = req.cookies.auth_token;
@@ -62,6 +74,8 @@ class UserMiddleware {
         auth_token: auth_token,
       });
 
+      req.user = await this.getTokenData(auth_token);
+
       next();
     } catch (error: any) {
       if (error instanceof ZodError) {
@@ -70,7 +84,10 @@ class UserMiddleware {
           .json({ message: "Informações inválidas", error: error.issues });
       }
 
-      if (error instanceof TokenExpiredError) {
+      if (
+        error instanceof TokenExpiredError ||
+        error instanceof jwt.JsonWebTokenError
+      ) {
         return res.status(401).json({ message: "Erro de autenticação" });
       }
 

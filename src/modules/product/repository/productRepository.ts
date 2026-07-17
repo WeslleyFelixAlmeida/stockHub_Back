@@ -1,4 +1,5 @@
 import { prisma } from "../../../connections/prisma";
+import { ProductModel } from "../models/productModel";
 
 export class ProductRepository {
   async insertProduct(

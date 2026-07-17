@@ -2,7 +2,7 @@ import { env } from "node:process";
 import { Request, Response } from "express";
 import { UserService } from "../services/userService";
 import { InvalidCredentialsException } from "../../../exceptions/invalidCredentialsException";
-import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 
 class UserController {
@@ -105,13 +105,13 @@ class UserController {
 
     data.res.cookie("auth_token", data.accessToken, {
       httpOnly: true,
-      secure: false, // em produção deve ser true
+      secure: env.NODE_ENV === "production", // em produção deve ser true
       sameSite: "strict",
     });
 
     data.res.cookie("refresh_token", data.refreshToken, {
       httpOnly: true,
-      secure: false, // em produção deve ser true
+      secure: env.NODE_ENV === "production", // em produção deve ser true
       sameSite: "strict",
     });
   }
@@ -143,24 +143,11 @@ class UserController {
     }
   }
 
-  private async getTokenData(data: { authToken: string }) {
-    if (!env.JWT_SECRET) {
-      throw new Error("JWT_SECRET não configurado");
-    }
-
-    const tokenData = jwt.verify(data.authToken, env.JWT_SECRET) as JwtPayload;
-    return {
-      id: Number(tokenData.sub),
-      email: tokenData.email,
-    };
-  }
-
   async getUserData(req: Request, res: Response) {
     try {
-      const authToken = req.cookies.auth_token;
-      const tokenData = await this.getTokenData({ authToken: authToken });
+      const userTokenData = req.user!;
       const userData = await this.userService.getUserData({
-        email: tokenData.email,
+        email: userTokenData.email,
       });
 
       return res.status(200).json({ data: userData });
@@ -171,13 +158,12 @@ class UserController {
 
   async deleteAccount(req: Request, res: Response) {
     try {
-      const authToken = req.cookies.auth_token;
       const refresh_token = req.cookies.auth_token;
-      const tokenData = await this.getTokenData({ authToken: authToken });
+      const userTokenData = req.user!;
       const data = req.body;
 
       const deleteAcc = await this.userService.deleteAccount({
-        userId: tokenData.id,
+        userId: userTokenData.id,
         password: data.password,
       });
 
@@ -196,12 +182,11 @@ class UserController {
 
   async updatePassword(req: Request, res: Response) {
     try {
-      const authToken = req.cookies.auth_token;
-      const tokenData = await this.getTokenData({ authToken: authToken });
+      const userTokenData = req.user!;
       const data = req.body;
 
       const updatePassword = await this.userService.updatePassword({
-        userId: tokenData.id,
+        userId: userTokenData.id,
         oldPassword: data.oldPassword,
         newPassword: data.newPassword,
       });
@@ -217,12 +202,11 @@ class UserController {
 
   async updateUsername(req: Request, res: Response) {
     try {
-      const authToken = req.cookies.auth_token;
-      const tokenData = await this.getTokenData({ authToken: authToken });
+      const userTokenData = req.user!;
       const data = req.body;
 
       const updateUsername = await this.userService.updateUsername({
-        userId: tokenData.id,
+        userId: userTokenData.id,
         newUsername: data.newUsername,
       });
 

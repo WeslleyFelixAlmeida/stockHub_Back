@@ -1,4 +1,5 @@
 import { InsertProductDTO } from "../dtos/insertProductDTO";
+import { ProductModel } from "../models/productModel";
 import { ProductRepository } from "../repository/productRepository";
 
 export class ProductService {
