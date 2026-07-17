@@ -2,6 +2,8 @@ import { RegisterDTO } from "../dtos/user/registerDTO";
 import { prisma } from "../../../connections/prisma";
 import { InvalidCredentialsException } from "../../../exceptions/invalidCredentialsException";
 import { redis } from "../../../connections/redis";
+import { Prisma } from "@prisma/client";
+import { DuplicateUserException } from "../../../exceptions/duplicateUserException";
 
 export class UserRepository {
   async registerUser(data: RegisterDTO) {
@@ -14,6 +16,12 @@ export class UserRepository {
         },
       });
     } catch (error: any) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new DuplicateUserException();
+      }
       throw new Error(error);
     }
   }

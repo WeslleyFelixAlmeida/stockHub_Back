@@ -26,6 +26,7 @@ class UserMiddleware {
           .status(400)
           .json({ message: "Informações inválidas", error: error.issues });
       }
+
       return res.status(500).json({ message: "Ocorreu um erro no servidor" });
     }
   }
@@ -74,10 +75,12 @@ class UserMiddleware {
         auth_token: auth_token,
       });
 
-      req.user = await this.getTokenData(auth_token);
+      req.user = await this.getTokenData({ authToken: auth_token });
 
       next();
     } catch (error: any) {
+      
+      console.log(error);
       if (error instanceof ZodError) {
         return res
           .status(400)
