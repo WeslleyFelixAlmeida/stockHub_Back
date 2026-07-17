@@ -17,7 +17,7 @@ class UserMiddleware {
     next: NextFunction,
   ) {
     try {
-      const validation = registerSchema.parse(req.body);
+      req.body = registerSchema.parse(req.body);
 
       next();
     } catch (error: any) {
@@ -32,7 +32,7 @@ class UserMiddleware {
 
   async loginUserMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
-      const validation = loginSchema.parse(req.body);
+      req.body = loginSchema.parse(req.body);
 
       next();
     } catch (error: any) {
@@ -112,7 +112,7 @@ class UserMiddleware {
     next: NextFunction,
   ) {
     try {
-      const validation = updateUsernameSchema.parse(req.body);
+      req.body = updateUsernameSchema.parse(req.body);
 
       next();
     } catch (error: any) {
@@ -131,7 +131,7 @@ class UserMiddleware {
     next: NextFunction,
   ) {
     try {
-      const validation = updatePasswordSchema.parse(req.body);
+      req.body = updatePasswordSchema.parse(req.body);
       next();
     } catch (error: any) {
       if (error instanceof ZodError) {
@@ -149,7 +149,7 @@ class UserMiddleware {
     next: NextFunction,
   ) {
     try {
-      const validation = deleteAccountSchema.parse(req.body);
+      req.body = deleteAccountSchema.parse(req.body);
       next();
     } catch (error: any) {
       if (error instanceof ZodError) {

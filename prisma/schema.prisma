@@ -8,18 +8,70 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
 
-  name        String
-  email       String   @unique
-  password    String
+  name          String
+  email         String     @unique
+  password      String
 
-  role        String   @default("COMMON_USER")
+  role          String     @default("COMMON_USER")
 
-  isActive    Boolean  @default(true)
+  isActive      Boolean    @default(true)
 
-  lastLoginAt DateTime?
+  lastLoginAt   DateTime?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  categories    Category[]
+  products      Product[]
+}
+
+model Category {
+  id            Int        @id @default(autoincrement())
+
+  name          String     @unique
+
+  createdById   Int
+  createdBy     User       @relation(fields: [createdById], references: [id])
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  products      Product[]
+}
+
+model Product {
+  id             Int        @id @default(autoincrement())
+
+  sku            String     @unique
+
+  name           String
+  description    String?
+
+  barcode        String?
+
+  image          Bytes?
+  imageType      String?
+
+  purchasePrice  Int
+  salePrice      Int
+
+  stock          Int        @default(0)
+  minimumStock   Int        @default(0)
+
+  unit           String
+
+  supplierName   String
+
+  categoryId     Int
+  category       Category   @relation(fields: [categoryId], references: [id])
+
+  createdById    Int
+  createdBy      User       @relation(fields: [createdById], references: [id])
+
+  isActive       Boolean    @default(true)
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 }
