@@ -12,4 +12,11 @@ productRoutes.post(
   productController.insertNewProduct.bind(productController),
 );
 
+productRoutes.patch(
+  "/update/:sku",
+  userMiddleware.authMiddleware.bind(userMiddleware),
+  productMiddleware.updateProductMiddleware.bind(productMiddleware),
+  productController.updateProduct.bind(productController),
+);
+
 export default productRoutes;

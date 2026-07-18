@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { insertNewProductSchema } from "../schemas/insertNewProductSchema";
 import { ZodError } from "zod";
+import {
+  updateProductParamsSchema,
+  updateProductSchema,
+} from "../schemas/updateProductSchema";
 
 class ProductMiddleware {
   async insertNewProductMiddleware(
@@ -18,8 +22,34 @@ class ProductMiddleware {
         console.log(error);
         return res.status(400).json({ message: "Dados inválidos" });
       }
-      
+
       console.log(error);
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async updateProductMiddleware(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      if (req.body.sku) {
+        return res.status(403).json({
+          message: "O SKU do produto não pode ser alterado",
+        });
+      }
+
+      req.params = updateProductParamsSchema.parse(req.params);
+      req.body = updateProductSchema.parse(req.body);
+
+      next();
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: "Dados inválidos", error: error.issues });
+      }
       return res.status(500).json({ message: "Ocorreu um erro no servidor" });
     }
   }

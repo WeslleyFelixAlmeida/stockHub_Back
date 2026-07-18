@@ -11,5 +11,5 @@ export interface InsertProductDTO {
   unit: string;
   supplierName: string;
   categoryId: number;
-  createdById?: number;
+  createdById: number;
 }

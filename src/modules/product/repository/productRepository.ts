@@ -1,4 +1,6 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../../connections/prisma";
+import { DuplicateProductException } from "../../../exceptions/duplicateProductException";
 import { ProductModel } from "../models/productModel";
 
 export class ProductRepository {
@@ -47,10 +49,50 @@ export class ProductRepository {
       unit: insert.unit,
       supplierName: insert.supplierName,
       categoryId: insert.categoryId,
-      // isActive: insert.isActive,
-      // createdAt: insert.createdAt,
-      // updatedAt: insert.updatedAt,
-      // createdById: insert.createdById,
     };
+  }
+
+  async updateProduct(
+    productDataUpdate: Partial<Omit<ProductModel, "sku">> & {
+      sku: string;
+      createdById: number;
+    },
+  ): Promise<Pick<ProductModel, "sku">> {
+    try {
+      const updated = await prisma.product.update({
+        where: {
+          sku: productDataUpdate.sku,
+          createdById: productDataUpdate.createdById,
+        },
+        data: {
+          name: productDataUpdate.name,
+          purchasePrice: productDataUpdate.purchasePrice,
+          salePrice: productDataUpdate.salePrice,
+          supplierName: productDataUpdate.supplierName,
+          unit: productDataUpdate.unit,
+          barcode: productDataUpdate.barcode,
+          categoryId: productDataUpdate.categoryId,
+          description: productDataUpdate.description,
+          minimumStock: productDataUpdate.minimumStock,
+          stock: productDataUpdate.stock,
+          image: productDataUpdate.image
+            ? Uint8Array.from(productDataUpdate.image)
+            : undefined,
+          imageType: productDataUpdate.imageType,
+        },
+        select: { sku: true },
+      });
+
+      return {
+        sku: updated.sku,
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2002") {
+          throw new DuplicateProductException();
+        }
+      }
+      throw error;
+    }
   }
 }
