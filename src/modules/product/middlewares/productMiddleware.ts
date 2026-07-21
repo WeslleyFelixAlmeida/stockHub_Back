@@ -7,6 +7,7 @@ import {
 } from "../schemas/updateProductSchema";
 import { getProductsSchema } from "../schemas/getProductsSchema";
 import { getProductSchema } from "../schemas/getProductSchema";
+import { deleteProductSchema } from "../schemas/deleteProductSchema";
 
 class ProductMiddleware {
   async insertNewProductMiddleware(
@@ -72,10 +73,34 @@ class ProductMiddleware {
     }
   }
 
-  async getProductDataMiddleware(req: Request, res: Response, next: NextFunction) {
+  async getProductDataMiddleware(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
     try {
       const validate = getProductSchema.parse(req.params);
       req.getProductData = validate;
+      next();
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: "Dados inválidos", error: error.issues });
+      }
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async deleteProductMiddleware(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const validate = deleteProductSchema.parse(req.params);
+
+      req.params = validate;
       next();
     } catch (error: any) {
       if (error instanceof ZodError) {

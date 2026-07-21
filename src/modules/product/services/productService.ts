@@ -158,4 +158,16 @@ export class ProductService {
       }),
     };
   }
+
+  async deleteProduct(data: {
+    userId: number;
+    sku: string;
+  }): Promise<Pick<ProductModel, "sku">> {
+    const product = await this.productRepository.deleteProduct({
+      userId: data.userId,
+      sku: data.sku,
+    });
+
+    return { sku: product.sku };
+  }
 }

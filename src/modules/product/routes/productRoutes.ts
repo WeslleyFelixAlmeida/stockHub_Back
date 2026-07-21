@@ -34,6 +34,14 @@ productRoutes.get(
   productController.getProductData.bind(productController),
 );
 
+productRoutes.delete(
+  "/delete/:sku",
+  userMiddleware.authMiddleware.bind(userMiddleware),
+  productMiddleware.deleteProductMiddleware.bind(productMiddleware),
+  productController.deleteProduct.bind(productController),
+);
+
+
 
 
 export default productRoutes;

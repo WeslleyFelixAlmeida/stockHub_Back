@@ -168,4 +168,27 @@ export class ProductRepository {
       categoryId: product.categoryId,
     };
   }
+
+  async deleteProduct(data: {
+    userId: number;
+    sku: string;
+  }): Promise<Pick<ProductModel, "sku">> {
+    try {
+      return await prisma.product.delete({
+        where: {
+          sku: data.sku,
+          createdById: data.userId,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        throw new ProductNotFoundException();
+      }
+
+      throw error;
+    }
+  }
 }

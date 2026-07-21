@@ -100,6 +100,29 @@ class ProductController {
       return res.status(500).json({ message: "Ocorreu um erro no servidor" });
     }
   }
+
+  async deleteProduct(req: Request, res: Response) {
+    try {
+      const userTokenData = req.user!;
+      const sku: string = req.params.sku as string;
+
+      const product = await this.productService.deleteProduct({
+        userId: userTokenData.id,
+        sku: sku,
+      });
+
+      res.status(200).json({
+        message: "Produto deletado com sucesso",
+        data: product,
+      });
+    } catch (error: any) {
+      console.log(error);
+      if (error instanceof ProductNotFoundException) {
+        return res.status(404).json({ message: "Produto não encontrado" });
+      }
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
 }
 
 export const productController = new ProductController();
