@@ -4,8 +4,8 @@ export interface ProductModel {
   name: string;
   description?: string;
   barcode?: string;
-  image?: Buffer;
-  imageType?: string;
+  image: Buffer | undefined;
+  imageType: string;
   purchasePrice: number;
   salePrice: number;
   stock: number;

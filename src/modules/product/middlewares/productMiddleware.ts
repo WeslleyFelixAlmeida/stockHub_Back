@@ -5,6 +5,8 @@ import {
   updateProductParamsSchema,
   updateProductSchema,
 } from "../schemas/updateProductSchema";
+import { getProductsSchema } from "../schemas/getProductsSchema";
+import { getProductSchema } from "../schemas/getProductSchema";
 
 class ProductMiddleware {
   async insertNewProductMiddleware(
@@ -43,6 +45,37 @@ class ProductMiddleware {
       req.params = updateProductParamsSchema.parse(req.params);
       req.body = updateProductSchema.parse(req.body);
 
+      next();
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: "Dados inválidos", error: error.issues });
+      }
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async getProductsMiddleware(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validate = getProductsSchema.parse(req.query);
+      req.productPagination = validate;
+
+      next();
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: "Dados inválidos", error: error.issues });
+      }
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async getProductDataMiddleware(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validate = getProductSchema.parse(req.params);
+      req.getProductData = validate;
       next();
     } catch (error: any) {
       if (error instanceof ZodError) {

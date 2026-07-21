@@ -1,11 +1,12 @@
+import { GetProductsDTO, PaginationInformations } from "../dtos/getProductDTO";
 import { InsertProductDTO } from "../dtos/insertProductDTO";
 import { UpdateProductDTO } from "../dtos/updateProductDTO";
 import { ProductModel } from "../models/productModel";
 import { ProductRepository } from "../repository/productRepository";
 
-type productReturn<T> = Promise<
+type ProductReturn<T> = Promise<
   Omit<T, "createdAt" | "updatedAt" | "createdById" | "isActive" | "image"> & {
-    image: string | null;
+    image: string;
   }
 >;
 
@@ -18,7 +19,7 @@ export class ProductService {
 
   private convertImageToBuffer(imageData: { imageBase64: string }): {
     imageBuffer: Buffer;
-    imageType?: string;
+    imageType: string;
   } {
     let base64Data = imageData.imageBase64;
     let imageType: string | undefined;
@@ -31,22 +32,18 @@ export class ProductService {
 
     return {
       imageBuffer: Buffer.from(base64Data, "base64"),
-      imageType,
+      imageType: imageType ? imageType : "",
     };
   }
 
   private convertImageToBase64(imageData: {
-    imageBuffer?: Buffer;
-    imageType?: string;
-  }): string | null {
-    if (!imageData.imageBuffer || !imageData.imageType) {
-      return null;
-    }
-
+    imageBuffer: Buffer;
+    imageType: string;
+  }): string {
     return `data:${imageData.imageType};base64,${imageData.imageBuffer.toString("base64")}`;
   }
 
-  async insertNewProduct(dto: InsertProductDTO): productReturn<ProductModel> {
+  async insertNewProduct(dto: InsertProductDTO): ProductReturn<ProductModel> {
     const { imageBuffer, imageType } = this.convertImageToBuffer({
       imageBase64: dto.image,
     });
@@ -64,10 +61,10 @@ export class ProductService {
       purchasePrice: dto.purchasePrice * 100,
     });
 
-    const imageBase64 =
-      insertNewProduct.image && insertNewProduct.imageType
-        ? `data:${insertNewProduct.imageType};base64,${insertNewProduct.image.toString("base64")}`
-        : null;
+    const imageBase64 = this.convertImageToBase64({
+      imageBuffer: insertNewProduct.image!,
+      imageType: insertNewProduct.imageType,
+    });
 
     return {
       ...insertNewProduct,
@@ -122,5 +119,43 @@ export class ProductService {
       });
 
     return { sku: updatedProduct.sku, changedValues: changedValues };
+  }
+
+  async getProducts(data: {
+    userId: number;
+    nextSKU?: string;
+  }): Promise<GetProductsDTO> {
+    const products = await this.productRepository.getProducts({
+      userId: data.userId,
+      nextSKU: data.nextSKU,
+    });
+
+    let paginationData: PaginationInformations;
+
+    if (products.length > 10) {
+      paginationData = { nextSKU: products[10].sku, hasNext: true };
+      products.pop();
+      return { productsData: products, paginationData: paginationData };
+    }
+
+    return { productsData: products, paginationData: { hasNext: false } };
+  }
+
+  async getProductData(data: {
+    userId: number;
+    sku: string;
+  }): Promise<Omit<ProductReturn<ProductModel>, "imageType">> {
+    const product = await this.productRepository.getProductData({
+      userId: data.userId,
+      sku: data.sku,
+    });
+
+    return {
+      ...product,
+      image: this.convertImageToBase64({
+        imageBuffer: product.image!,
+        imageType: product.imageType,
+      }),
+    };
   }
 }

@@ -19,4 +19,21 @@ productRoutes.patch(
   productController.updateProduct.bind(productController),
 );
 
+
+productRoutes.get(
+  "/",
+  userMiddleware.authMiddleware.bind(userMiddleware),
+  productMiddleware.getProductsMiddleware.bind(productMiddleware),
+  productController.getProducts.bind(productController),
+);
+
+productRoutes.get(
+  "/productData/:sku",
+  userMiddleware.authMiddleware.bind(userMiddleware),
+  productMiddleware.getProductDataMiddleware.bind(productMiddleware),
+  productController.getProductData.bind(productController),
+);
+
+
+
 export default productRoutes;

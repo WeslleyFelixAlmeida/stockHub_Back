@@ -6,6 +6,17 @@ declare global {
         email: string;
       };
     }
+    interface Request {
+      productPagination?: {
+        nextSKU?: string;
+        hasNext: boolean;
+      };
+    }
+    interface Request {
+      getProductData: {
+        sku: string;
+      };
+    }
   }
 }
 

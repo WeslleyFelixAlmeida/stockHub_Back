@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../../../connections/prisma";
 import { DuplicateProductException } from "../../../exceptions/duplicateProductException";
 import { ProductModel } from "../models/productModel";
+import { ProductNotFoundException } from "../../../exceptions/productNotFoundException";
 
 export class ProductRepository {
   async insertProduct(
@@ -23,8 +24,8 @@ export class ProductRepository {
         description: product.description,
         minimumStock: product.minimumStock,
         stock: product.stock,
-        image: product.image ? Uint8Array.from(product.image) : undefined,
-        imageType: product.imageType ?? undefined,
+        image: Uint8Array.from(product.image!),
+        imageType: product.imageType!,
       },
       omit: {
         createdById: true,
@@ -94,5 +95,77 @@ export class ProductRepository {
       }
       throw error;
     }
+  }
+
+  async getProducts(data: {
+    userId: number;
+    nextSKU?: string;
+  }): Promise<Pick<ProductModel, "sku" | "stock" | "name">[]> {
+    const products = await prisma.product.findMany({
+      where: {
+        createdById: data.userId,
+      },
+      select: {
+        sku: true,
+        stock: true,
+        name: true,
+      },
+      take: 10,
+      orderBy: {
+        id: "desc",
+      },
+
+      ...(data.nextSKU && {
+        cursor: {
+          sku: data.nextSKU,
+        },
+        skip: 1,
+      }),
+    });
+
+    return products;
+  }
+
+  async getProductData(data: {
+    userId: number;
+    sku: string;
+  }): Promise<
+    Omit<
+      ProductModel,
+      "createdById" | "updatedAt" | "createdAt" | "isActive" | "id"
+    >
+  > {
+    const product = await prisma.product.findFirst({
+      where: {
+        createdById: data.userId,
+        sku: data.sku,
+      },
+      omit: {
+        createdById: true,
+        updatedAt: true,
+        createdAt: true,
+        isActive: true,
+      },
+    });
+
+    if (!product) {
+      throw new ProductNotFoundException();
+    }
+
+    return {
+      sku: product.sku,
+      name: product.name,
+      description: product.description ?? undefined,
+      barcode: product.barcode ?? undefined,
+      image: Buffer.from(product.image),
+      imageType: product.imageType,
+      purchasePrice: product.purchasePrice,
+      salePrice: product.salePrice,
+      stock: product.stock,
+      minimumStock: product.minimumStock,
+      unit: product.unit,
+      supplierName: product.supplierName,
+      categoryId: product.categoryId,
+    };
   }
 }

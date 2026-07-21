@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ProductService } from "../services/productService";
 import { InsertProductDTO } from "../dtos/insertProductDTO";
 import { UpdateProductDTO } from "../dtos/updateProductDTO";
+import { ProductNotFoundException } from "../../../exceptions/productNotFoundException";
 
 class ProductController {
   private productService: ProductService;
@@ -52,6 +53,50 @@ class ProductController {
     } catch (error: any) {
       console.log(error);
 
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async getProducts(req: Request, res: Response) {
+    try {
+      const userTokenData = req.user!;
+      const nextSKU: string = req.productPagination?.nextSKU ?? "";
+
+      const products = await this.productService.getProducts({
+        userId: userTokenData.id,
+        nextSKU: nextSKU,
+      });
+
+      res.status(200).json({
+        message: "Informações enviadas",
+        data: products,
+      });
+    } catch (error: any) {
+      console.log(error);
+
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async getProductData(req: Request, res: Response) {
+    try {
+      const userTokenData = req.user!;
+      const sku: string = req.getProductData.sku;
+
+      const product = await this.productService.getProductData({
+        userId: userTokenData.id,
+        sku: sku,
+      });
+
+      res.status(200).json({
+        message: "Informações enviadas",
+        data: product,
+      });
+    } catch (error: any) {
+      console.log(error);
+      if (error instanceof ProductNotFoundException) {
+        return res.status(404).json({ message: "Produto não encontrado" });
+      }
       return res.status(500).json({ message: "Ocorreu um erro no servidor" });
     }
   }

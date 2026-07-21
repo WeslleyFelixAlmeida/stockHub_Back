@@ -51,8 +51,8 @@ model Product {
 
   barcode        String?
 
-  image          Bytes?
-  imageType      String?
+  image          Bytes
+  imageType      String
 
   purchasePrice  Int
   salePrice      Int
