@@ -1,10 +1,10 @@
 import { env } from "node:process";
 import { Request, Response } from "express";
 import { UserService } from "../services/userService";
-import { InvalidCredentialsException } from "../../../exceptions/invalidCredentialsException";
+import { InvalidCredentialsException } from "../exceptions/invalidCredentialsException";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
-import { DuplicateUserException } from "../../../exceptions/duplicateUserException";
+import { DuplicateUserException } from "../exceptions/duplicateUserException";
 
 class UserController {
   private userService: UserService;
@@ -24,7 +24,6 @@ class UserController {
 
       return res.status(201).json({ message: "Usuário criado com sucesso!" });
     } catch (error) {
-      
       if (error instanceof DuplicateUserException) {
         return res.status(409).json({ message: error.message });
       }

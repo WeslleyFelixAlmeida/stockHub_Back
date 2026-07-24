@@ -30,7 +30,7 @@ model User {
 model Category {
   id            Int        @id @default(autoincrement())
 
-  name          String     @unique
+  name          String
 
   createdById   Int
   createdBy     User       @relation(fields: [createdById], references: [id])
@@ -39,12 +39,14 @@ model Category {
   updatedAt     DateTime   @updatedAt
 
   products      Product[]
+
+  @@unique([createdById, name])
 }
 
 model Product {
   id             Int        @id @default(autoincrement())
 
-  sku            String     @unique
+  sku            String
 
   name           String
   description    String?
@@ -74,4 +76,6 @@ model Product {
 
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+
+  @@unique([createdById, sku])
 }

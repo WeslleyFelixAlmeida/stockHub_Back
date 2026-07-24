@@ -5,12 +5,13 @@ import cors from "cors";
 import userRoutes from "./modules/user/routes/userRoutes";
 import { connectRedis } from "./connections/redis";
 import productRoutes from "./modules/product/routes/productRoutes";
+import categoryRoutes from "./modules/category/routes/categoryRoutes";
 
 async function serverInit() {
   try {
-    await connectRedis(); 
+    await connectRedis();
 
-    console.log("Redis conectado!"); 
+    console.log("Redis conectado!");
 
     const server = express();
 
@@ -26,9 +27,10 @@ async function serverInit() {
         credentials: true,
       }),
     );
-    
+
     server.use("/user", userRoutes);
     server.use("/product", productRoutes);
+    server.use("/category", categoryRoutes);
 
     server.listen(PORT, () => {
       console.log(`Servidor ligado na porta ${PORT}`);

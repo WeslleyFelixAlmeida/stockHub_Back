@@ -1,7 +1,7 @@
 import { env } from "node:process";
 import { AuthDTO } from "../dtos/user/authDTO";
 import { RegisterDTO } from "../dtos/user/registerDTO";
-import { InvalidCredentialsException } from "../../../exceptions/invalidCredentialsException";
+import { InvalidCredentialsException } from "../exceptions/invalidCredentialsException";
 import { UserModel } from "../models/userModel";
 import { UserRepository } from "../repository/userRepository";
 import bcrypt from "bcrypt";

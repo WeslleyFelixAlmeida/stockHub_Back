@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { ProductService } from "../services/productService";
 import { InsertProductDTO } from "../dtos/insertProductDTO";
 import { UpdateProductDTO } from "../dtos/updateProductDTO";
-import { ProductNotFoundException } from "../../../exceptions/productNotFoundException";
+import { ProductNotFoundException } from "../exceptions/productNotFoundException";
+import { DuplicateProductException } from "../exceptions/duplicateProductException";
 
 class ProductController {
   private productService: ProductService;
@@ -26,7 +27,11 @@ class ProductController {
       });
     } catch (error: any) {
       console.log(error);
-
+      if (error instanceof DuplicateProductException) {
+        return res
+          .status(409)
+          .json({ message: "Erro, código SKU de produto já adicionado" });
+      }
       return res.status(500).json({ message: "Ocorreu um erro no servidor" });
     }
   }
