@@ -19,7 +19,6 @@ productRoutes.patch(
   productController.updateProduct.bind(productController),
 );
 
-
 productRoutes.get(
   "/",
   userMiddleware.authMiddleware.bind(userMiddleware),

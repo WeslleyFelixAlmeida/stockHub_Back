@@ -71,8 +71,10 @@ export class ProductRepository {
     try {
       const updated = await prisma.product.update({
         where: {
-          sku: productDataUpdate.sku,
-          createdById: productDataUpdate.createdById,
+          createdById_sku: {
+            sku: productDataUpdate.sku,
+            createdById: productDataUpdate.createdById,
+          },
         },
         data: {
           name: productDataUpdate.name,
@@ -126,7 +128,10 @@ export class ProductRepository {
 
       ...(data.nextSKU && {
         cursor: {
-          sku: data.nextSKU,
+          createdById_sku: {
+            createdById: data.userId,
+            sku: data.nextSKU,
+          },
         },
         skip: 1,
       }),
@@ -185,8 +190,10 @@ export class ProductRepository {
     try {
       return await prisma.product.delete({
         where: {
-          sku: data.sku,
-          createdById: data.userId,
+          createdById_sku: {
+            createdById: data.userId,
+            sku: data.sku,
+          },
         },
       });
     } catch (error) {
