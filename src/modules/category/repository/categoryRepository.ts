@@ -52,7 +52,7 @@ export class CategoryRepository {
     data: UpdateCategoryNameDTO,
   ): Promise<Pick<CategoryModel, "id" | "name">> {
     await this.checkOwner({ createdById: data.createdById, id: data.id });
-    
+
     try {
       return await prisma.category.update({
         where: {
@@ -95,5 +95,59 @@ export class CategoryRepository {
     } catch (error: any) {
       throw new Error(error);
     }
+  }
+
+  async getCategory(data: {
+    createdById: number;
+    categoryId: number;
+  }): Promise<Pick<CategoryModel, "id" | "name">> {
+    await this.checkOwner({
+      createdById: data.createdById,
+      id: data.categoryId,
+    });
+
+    const category = await prisma.category.findUnique({
+      where: {
+        id: data.categoryId,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    if (!category) {
+      throw new CategoryNotFoundException();
+    }
+
+    return category;
+  }
+
+  async getCategories(data: {
+    userId: number;
+    nextId?: number;
+  }): Promise<Pick<CategoryModel, "id" | "name">[]> {
+    const categories = await prisma.category.findMany({
+      where: {
+        createdById: data.userId,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      take: 10,
+      orderBy: {
+        id: "desc",
+      },
+
+      ...(data.nextId && {
+        cursor: {
+          id: data.nextId,
+        },
+        skip: 1,
+      }),
+    });
+
+    return categories;
   }
 }

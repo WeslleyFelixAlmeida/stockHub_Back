@@ -26,4 +26,17 @@ categoryRoutes.delete(
   categoryController.deleteCategory.bind(categoryController),
 );
 
+categoryRoutes.get(
+  "/",
+  userMiddleware.authMiddleware.bind(userMiddleware),
+  categoryController.getCategories.bind(categoryController),
+);
+
+categoryRoutes.get(
+  "/categoryData/:id",
+  userMiddleware.authMiddleware.bind(userMiddleware),
+  categoryMiddleware.getCategoryDataMiddleware.bind(categoryMiddleware),
+  categoryController.getCategoryData.bind(categoryController),
+);
+
 export default categoryRoutes;

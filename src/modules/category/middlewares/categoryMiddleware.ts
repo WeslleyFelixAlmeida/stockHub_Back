@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { createCategorySchema } from "../schemas/createCategorySchema";
 import { categoryParamsSchema } from "../schemas/categoryParamsSchema";
 import { updateCategoryNameSchema } from "../schemas/updateCategorySchema";
+import { getCategorySchema } from "../schemas/getCategoriesSchema";
 
 class CategoryMiddleware {
   async createCategoryMiddleware(
@@ -56,6 +57,27 @@ class CategoryMiddleware {
     try {
       const validateParams = categoryParamsSchema.parse(req.params);
       req.body = { id: validateParams.id };
+
+      next();
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        console.log(error);
+        return res.status(400).json({ message: "Dados inválidos" });
+      }
+
+      console.log(error);
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async getCategoryDataMiddleware(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const validateParams = getCategorySchema.parse(req.params);
+      req.body = validateParams;
 
       next();
     } catch (error: any) {

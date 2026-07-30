@@ -4,6 +4,7 @@ import { InvalidCredentialsException } from "../exceptions/invalidCredentialsExc
 import { redis } from "../../../connections/redis";
 import { Prisma } from "@prisma/client";
 import { DuplicateUserException } from "../exceptions/duplicateUserException";
+import { UserModel } from "../models/userModel";
 
 export class UserRepository {
   async registerUser(data: RegisterDTO) {
@@ -42,9 +43,11 @@ export class UserRepository {
     }
   }
 
-  async getUserInfoById(data: { id: number }) {
+  async getUserInfoById(data: {
+    id: number;
+  }): Promise<Omit<UserModel, "createdAt" | "updatedAt">> {
     try {
-      return await prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id: data.id },
         select: {
           id: true,
@@ -53,6 +56,13 @@ export class UserRepository {
           password: true,
         },
       });
+
+      return {
+        email: user!.email,
+        name: user!.name,
+        password: user!.password,
+        id: user!.id,
+      };
     } catch (error: any) {
       throw new Error(error);
     }

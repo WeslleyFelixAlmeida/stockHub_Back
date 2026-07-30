@@ -5,6 +5,8 @@ import { CreateCategoryDTO } from "../dtos/createCategoryDTO";
 import { UpdateCategoryNameDTO } from "../dtos/updateCategoryNameDTO";
 import { DeleteCategoryDTO } from "../dtos/deleteCategoryDTO";
 import { CategoryNotFoundException } from "../exceptions/categoryNotFoundException";
+import { CategoryModel } from "../models/categoryModel";
+import { GetCategoriesDTO, GetCategoryDTO } from "../dtos/getCategoriesDTO";
 
 class CategoryController {
   private categoryService: CategoryService;
@@ -66,6 +68,7 @@ class CategoryController {
       return res.status(500).json({ message: "Ocorreu um erro no servidor" });
     }
   }
+
   async deleteCategory(req: Request, res: Response) {
     try {
       const credentials = req.user!;
@@ -81,14 +84,54 @@ class CategoryController {
         .status(200)
         .json({ message: "Categoria deletada com sucesso", data: deleteData });
     } catch (error: any) {
-
       if (error instanceof CategoryNotFoundException) {
         return res
           .status(404)
           .json({ message: "Erro, categoria não encontrada" });
       }
-      
-      console.log(error)
+
+      console.log(error);
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async getCategoryData(req: Request, res: Response) {
+    try {
+      const credentials = req.user!;
+      const categoryId = req.body.id;
+
+      const categoryData: GetCategoryDTO =
+        await this.categoryService.getCategory({
+          userId: credentials.id,
+          categoryId: categoryId,
+        });
+
+      return res.status(200).json({ data: categoryData });
+    } catch (error: any) {
+      console.log(error);
+      if (error instanceof CategoryNotFoundException) {
+        return res
+          .status(404)
+          .json({ message: "Erro, categoria não encontrada" });
+      }
+      return res.status(500).json({ message: "Ocorreu um erro no servidor" });
+    }
+  }
+
+  async getCategories(req: Request, res: Response) {
+    try {
+      const credentials = req.user!;
+      const nextId: number = req.categoryPagination?.id ?? -1;
+
+      const categories: GetCategoriesDTO =
+        await this.categoryService.getCategories({
+          userId: credentials.id,
+          nextId: nextId,
+        });
+
+      return res.status(200).json({ data: categories });
+    } catch (error: any) {
+      console.log(error);
       return res.status(500).json({ message: "Ocorreu um erro no servidor" });
     }
   }

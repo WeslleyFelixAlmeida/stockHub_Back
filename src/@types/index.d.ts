@@ -17,6 +17,11 @@ declare global {
         sku: string;
       };
     }
+    interface Request {
+      categoryPagination?: {
+        id: number;
+      };
+    }
   }
 }
 
